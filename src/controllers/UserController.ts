@@ -1,11 +1,23 @@
 import { Request, Response } from 'express';
 import { RestController } from './RestController';
 import { AppError } from '../utils/AppError';
+import { createUser } from '../services/user.service';
 
 class UserController extends RestController {
-  // Implemented in a later milestone: create user and list a user's sessions.
-  public createUser = async (_req: Request, _res: Response): Promise<void> => {
-    throw new AppError('Create User API is not implemented yet', 501);
+  public createUser = async (req: Request, res: Response): Promise<void> => {
+    const user = await createUser({
+      fullName: req.body.fullName,
+      email: req.body.email,
+      phone: req.body.phone,
+    });
+
+    this.sendCreated(res, 'User created successfully', {
+      id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      phone: user.phone,
+      createdAt: user.createdAt,
+    });
   };
 
   public getUserSessions = async (_req: Request, _res: Response): Promise<void> => {
