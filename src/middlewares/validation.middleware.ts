@@ -85,6 +85,24 @@ export const validateCreateSession: RequestHandler = (req, _res, next) => {
   next();
 };
 
+export const validateBookSession: RequestHandler = (req, _res, next) => {
+  const errors: string[] = [];
+
+  if (!isNonEmptyString(req.params.id) || !isValidObjectId(req.params.id)) {
+    errors.push('id must be a valid ObjectId');
+  }
+  if (!isNonEmptyString(req.body?.userId) || !isValidObjectId(req.body.userId)) {
+    errors.push('userId must be a valid ObjectId');
+  }
+
+  if (errors.length > 0) {
+    next(new AppError(`Validation failed: ${errors.join('; ')}`, 400));
+    return;
+  }
+
+  next();
+};
+
 export const validateDateTimestamp: RequestHandler = (req, res, next) => {
   const date = parseDateValue(req.query.dateTimestamp);
 

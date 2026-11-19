@@ -1,6 +1,7 @@
 import { Types } from 'mongoose';
 import { Session } from '../models/Session';
 import { Teacher } from '../models/Teacher';
+import { User } from '../models/User';
 import { AppError } from '../utils/AppError';
 import { SessionStatus } from '../types/session.types';
 import { getUtcDayRange } from '../utils/date';
@@ -71,4 +72,34 @@ export const getAvailableSessions = async (date: Date): Promise<AvailableSession
       },
     },
   ]);
+};
+
+export const bookSession = async (sessionId: string, userId: string) => {
+  const userExists = await User.exists({ _id: userId });
+
+  if (!userExists) {
+    throw new AppError('User not found', 404);
+  }
+
+  const session = await Session.findById(sessionId);
+
+  if (!session) {
+    throw new AppError('Session not found', 404);
+  }
+  if (session.status !== SessionStatus.AVAILABLE) {
+    throw new AppError('Session is not available for booking', 409);
+  }
+
+  // The status condition makes the update atomic so two bookings cannot both win.
+  const bookedSession = await Session.findOneAndUpdate(
+    { _id: sessionId, status: SessionStatus.AVAILABLE },
+    { $set: { userId, status: SessionStatus.BOOKED } },
+    { new: true, runValidators: true },
+  );
+
+  if (!bookedSession) {
+    throw new AppError('Session is no longer available for booking', 409);
+  }
+
+  return bookedSession;
 };
