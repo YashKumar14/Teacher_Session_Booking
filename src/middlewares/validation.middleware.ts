@@ -1,5 +1,6 @@
 import { RequestHandler } from 'express';
 import { AppError } from '../utils/AppError';
+import { parseDateValue } from '../utils/date';
 import { isValidObjectId } from '../utils/objectId';
 import {
   isEmail,
@@ -81,5 +82,22 @@ export const validateCreateSession: RequestHandler = (req, _res, next) => {
     return;
   }
 
+  next();
+};
+
+export const validateDateTimestamp: RequestHandler = (req, res, next) => {
+  const date = parseDateValue(req.query.dateTimestamp);
+
+  if (!date) {
+    next(
+      new AppError(
+        'dateTimestamp must be an ISO 8601 date or epoch milliseconds',
+        400,
+      ),
+    );
+    return;
+  }
+
+  res.locals.requestedDate = date;
   next();
 };
