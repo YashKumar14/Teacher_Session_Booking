@@ -85,6 +85,15 @@ export const validateCreateSession: RequestHandler = (req, _res, next) => {
   next();
 };
 
+export const validateSessionIdParam: RequestHandler = (req, _res, next) => {
+  if (!isNonEmptyString(req.params.id) || !isValidObjectId(req.params.id)) {
+    next(new AppError('Validation failed: id must be a valid ObjectId', 400));
+    return;
+  }
+
+  next();
+};
+
 export const validateBookSession: RequestHandler = (req, _res, next) => {
   const errors: string[] = [];
 

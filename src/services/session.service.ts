@@ -103,3 +103,27 @@ export const bookSession = async (sessionId: string, userId: string) => {
 
   return bookedSession;
 };
+
+export const completeSession = async (sessionId: string) => {
+  const session = await Session.findById(sessionId);
+
+  if (!session) {
+    throw new AppError('Session not found', 404);
+  }
+  if (session.status !== SessionStatus.BOOKED) {
+    throw new AppError('Only booked sessions can be marked as completed', 409);
+  }
+
+  // Guard the status in the filter as well, so a concurrent update cannot be overwritten.
+  const completedSession = await Session.findOneAndUpdate(
+    { _id: sessionId, status: SessionStatus.BOOKED },
+    { $set: { status: SessionStatus.COMPLETED, completedAt: new Date() } },
+    { new: true, runValidators: true },
+  );
+
+  if (!completedSession) {
+    throw new AppError('Session status changed; please retry', 409);
+  }
+
+  return completedSession;
+};

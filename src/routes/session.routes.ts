@@ -5,6 +5,7 @@ import {
   validateBookSession,
   validateCreateSession,
   validateDateTimestamp,
+  validateSessionIdParam,
 } from '../middlewares/validation.middleware';
 
 const router = Router();
@@ -19,6 +20,10 @@ router.post(
   validateBookSession,
   asyncHandler(sessionController.bookSession),
 );
-router.patch('/:id/complete', asyncHandler(sessionController.completeSession));
+router.patch(
+  '/:id/complete',
+  validateSessionIdParam,
+  asyncHandler(sessionController.completeSession),
+);
 
 export default router;

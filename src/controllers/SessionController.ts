@@ -3,6 +3,7 @@ import { RestController } from './RestController';
 import { AppError } from '../utils/AppError';
 import {
   bookSession,
+  completeSession,
   createSession,
   getAvailableSessions,
 } from '../services/session.service';
@@ -44,8 +45,18 @@ class SessionController extends RestController {
     });
   };
 
-  public completeSession = async (_req: Request, _res: Response): Promise<void> => {
-    throw new AppError('Complete Session API is not implemented yet', 501);
+  public completeSession = async (req: Request, res: Response): Promise<void> => {
+    const session = await completeSession(req.params.id);
+
+    this.sendResponse(res, 200, 'Session marked as completed', {
+      id: session._id,
+      teacherId: session.teacherId,
+      userId: session.userId,
+      startTime: session.startTime,
+      endTime: session.endTime,
+      status: session.status,
+      completedAt: session.completedAt,
+    });
   };
 }
 
